@@ -249,14 +249,14 @@ async def getAll(event):
 
 
     flag = True
-    db_id = 1
+
 
 @bot.on(events.NewMessage(pattern='^/add'))
 async def add(event):
+    db_id = 10
+    #if flag == true:
 
-    if flag == true:
-
-        flag = False
+        #flag = False
 
     message = event.message
     person_info = message.message.split()
@@ -268,8 +268,8 @@ async def add(event):
     db_connection.commit()
 
     if id not in data:
-        data[1] = {}
-    user_data = data[1]
+        data[id] = {}
+    user_data = data[id]
 
     if 'contacts' not in user_data:
         user_data['contacts'] = []
