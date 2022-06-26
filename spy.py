@@ -6,7 +6,12 @@ from time import mktime, sleep
 import telethon.sync
 from threading import Thread
 import collections
+import psycopg2
 
+DB_URI = "postgres://stdncweislqajb:dcb038bf8d3efd2498acb39c514f6ad6eee5f2fabe4725dc5d00c6ea8f43b934@ec2-34-242-8-97.eu-west-1.compute.amazonaws.com:5432/d2m7h0c1o04gu4"
+
+db_connection = psycopg2.connect(DB_URI, sslmode="require")
+db_object = db_connection.cursor()
 
 
 DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
@@ -113,9 +118,9 @@ async def clearData(event):
 async def start(event):
     message = event.message
     id = message.from_id
-    #if id not in data:
-       # data[1] = {}
-    user_data = data[1]
+    if id not in data:
+       data[1] = {}
+    user_data = data[id]
     if('is_running' in user_data and user_data['is_running']):
         await event.respond('Spy is already started')
         return
@@ -243,15 +248,24 @@ async def getAll(event):
     await event.respond(response)
 
 
+    flag = True
+    db_id = 1
 
 @bot.on(events.NewMessage(pattern='^/add'))
 async def add(event):
+
+    if flag == true:
+
+        flag = False
+
     message = event.message
     person_info = message.message.split()
     print(person_info)
     phone = person_info[1]
     name = person_info[2]
     id = message.from_id
+    db_object.execute("INSERT INTO users(id, phone, name) VALUES (%s, %s, %s)", (db_id, phone, name))
+    db_connection.commit()
 
     if id not in data:
         data[1] = {}
