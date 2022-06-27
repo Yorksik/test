@@ -80,8 +80,8 @@ async def clearLogs(event):
 async def clear(event):
     """Send a message when the command /start is issued."""
     message = event.message
-    #id = message.from_id
-    data[1] = {}
+    id = message.from_id
+    data[id] = {}
     await event.respond('User list has been cleared')
 
 @bot.on(events.NewMessage(pattern='^/help$'))
@@ -103,8 +103,8 @@ async def stop(event):
     """Send a message when the command /start is issued."""
     message = event.message
     id = message.from_id
-    #if id not in data:
-        #data[id] = {}
+    if id not in data:
+        data[id] = {}
     user_data = data[1]
     user_data['is_running'] = False
     await event.respond('Monitoring has been stopped')
@@ -181,8 +181,8 @@ async def remove(event):
     print(person_info)
     index = int(person_info[1])
     id = message.from_id
-    #if id not in data:
-        #data[id] = {}
+    if id not in data:
+        data[id] = {}
     user_data = data[1]
 
     if 'contacts' not in user_data:
@@ -202,8 +202,8 @@ async def setDelay(event):
     print(person_info)
     index = int(person_info[1])
     id = message.from_id
-    #if id not in data:
-        #data[id] = {}
+    if id not in data:
+        data[id] = {}
     user_data = data[1]
 
     print(index)
@@ -222,9 +222,9 @@ async def disconnect(event):
 async def list(event):
     message = event.message
     id = message.from_id
-    #if id not in data:
-        #data[id] = {}
-    user_data = data[1]
+    if id not in data:
+        data[id] = {}
+    user_data = data[id]
 
     if 'contacts' not in user_data:
         user_data['contacts'] = []
@@ -281,26 +281,6 @@ async def add(event):
 def main():
     """Start the bot."""
 
-
-    #message = events.NewMessage(())
-    #id = message.from_id
-
-    if id not in data:
-        data[1] = {}
-    user_data = data[1]
-
-    if 'contacts' not in user_data:
-        user_data['contacts'] = []
-    contacts = user_data['contacts']
-
-    contact = Contact('+375295503241', 'Any')
-    contacts.append(contact)
-    #events.respond(' Any has been added')
-
-    contact = Contact('+79384721896', 'Vinnik')
-    contacts.append(contact)
-    #events.respond(' Vinnik has been added')
-
     client.send_message('tbtest2bot', '/add +375295503241 Any')
     client.send_message('tbtest2bot', '/start')
     bot.run_until_disconnected()
@@ -311,7 +291,8 @@ def utc2localtime(utc):
 
     pivot = mktime(utc.timetuple())
     offset = datetime.fromtimestamp(pivot) - datetime.utcfromtimestamp(pivot)
-    return utc + offset + timedelta(minutes=180)
+    a= timedelta(minutes=180)
+    return utc + offset + a
 
 
 def printToFile(str):
