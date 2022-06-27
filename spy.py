@@ -13,8 +13,6 @@ DB_URI = "postgres://stdncweislqajb:dcb038bf8d3efd2498acb39c514f6ad6eee5f2fabe47
 db_connection = psycopg2.connect(DB_URI, sslmode="require")
 db_object = db_connection.cursor()
 
-
-
 DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 API_HASH = 'c7be2179ca2ae8e19bd0d7383eec9f52'
 API_ID = '10072148'
@@ -25,8 +23,6 @@ client: TelegramClient = TelegramClient('data_thief', API_ID, API_HASH)
 
 client.connect()
 client.start()
-
-
 
 bot = TelegramClient('bot', API_ID, API_HASH).start(bot_token=BOT_TOKEN)
 
@@ -49,7 +45,6 @@ help_messages = ['/start - start online monitoring ',
          '/cleardata - reset configuration',
          '/disconnect - disconnect bot',
          '/getall - status']
-
 
 print('running')
 class Contact:
@@ -162,18 +157,17 @@ async def start(event):
             elif isinstance(account.status, UserStatusOnline):
                 if contact.online != True:
                     contact.online = True
-                    await event.respond(f'{datetime.now().strftime(DATETIME_FORMAT)}: {contact.name} went online.')
+                    await event.respond(f'{(datetime.now()+timedelta(minutes=180)).strftime(DATETIME_FORMAT)}: {contact.name} went online.')
             else:
                 if contact.online != False:
                     contact.online = False
-                    await event.respond(f'{datetime.now().strftime(DATETIME_FORMAT)}: {contact.name} went offline.')
+                    await event.respond(f'{(datetime.now()+timedelta(minutes=180)).strftime(DATETIME_FORMAT)}: {contact.name} went offline.')
                 contact.last_offline = None
         delay = 5
         if('delay' in user_data):
             delay = user_data['delay']
         sleep(delay)
     await event.respond(f'Spy gonna zzzzzz...')
-
 
 @bot.on(events.NewMessage(pattern='^/remove'))
 async def remove(event):
@@ -206,7 +200,6 @@ async def remove(event):
         await event.respond(f'User №{index} has been deleted')
     else:
         await event.respond('Incorrect index')
-
 
 @bot.on(events.NewMessage(pattern='^/setdelay'))
 async def setDelay(event):
@@ -263,7 +256,6 @@ async def getAll(event):
 
     flag = True
 
-
 @bot.on(events.NewMessage(pattern='^/add'))
 async def add(event):
     message = event.message
@@ -318,7 +310,6 @@ async def db_add(event):
         db_connection.commit()
     await event.respond('Вся база добавлена!')
 
-
 def main():
     """Start the bot."""
 
@@ -328,15 +319,12 @@ def main():
 
     bot.run_until_disconnected()
 
-
-
 def utc2localtime(utc):
 
     pivot = mktime(utc.timetuple())
     offset = datetime.fromtimestamp(pivot) - datetime.utcfromtimestamp(pivot)
-    a= timedelta(minutes=180)
+    a = timedelta(minutes=180)
     return utc + offset + a
-
 
 def printToFile(str):
     file_name = 'spy_log.txt'
