@@ -14,6 +14,7 @@ db_connection = psycopg2.connect(DB_URI, sslmode="require")
 db_object = db_connection.cursor()
 
 
+
 DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 API_HASH = 'c7be2179ca2ae8e19bd0d7383eec9f52'
 API_ID = '10072148'
@@ -38,6 +39,7 @@ help_messages = ['/start - start online monitoring ',
          '/stop - stop online monitoring ',
          '/help - show help ',
          '/add - add user to monitoring list "/add +79991234567 UserName"',
+         '/db_add - add user from D_base"',
          '/list - show added users',
          '/clear - clear user list',
          '/remove - remove user from list with position in list (to show use /list command)"/remove 1"',
@@ -139,7 +141,7 @@ async def start(event):
     user_data['is_running'] = True
 
     while True:
-        user_data = data[1]
+        user_data = data[id]
         if(not user_data['is_running'] or len(contacts) < 1):
             break;
         print(f'running {1}: {counter}')
@@ -166,12 +168,11 @@ async def start(event):
                     contact.online = False
                     await event.respond(f'{datetime.now().strftime(DATETIME_FORMAT)}: {contact.name} went offline.')
                 contact.last_offline = None
-        delay = 1
+        delay = 5
         if('delay' in user_data):
             delay = user_data['delay']
         sleep(delay)
     await event.respond(f'Spy gonna zzzzzz...')
-
 
 
 @bot.on(events.NewMessage(pattern='^/remove'))
@@ -183,7 +184,7 @@ async def remove(event):
     id = message.from_id
     if id not in data:
         data[id] = {}
-    user_data = data[1]
+    user_data = data[id]
 
     if 'contacts' not in user_data:
         user_data['contacts'] = []
@@ -191,9 +192,21 @@ async def remove(event):
 
     if(len(contacts) > index):
         del contacts[index]
+        db_object.execute("SELECT * FROM users")
+        id_count = db_object.rowcount
+        i = index
+        int_index = index
+        db_object.execute(f'DELETE FROM users WHERE id = {int_index}')
+        db_connection.commit()
+        while i < id_count:
+
+            db_object.execute(f'UPDATE users SET id = {i} WHERE id = {i+1}')
+            i+=1
+            db_connection.commit()
         await event.respond(f'User №{index} has been deleted')
     else:
         await event.respond('Incorrect index')
+
 
 @bot.on(events.NewMessage(pattern='^/setdelay'))
 async def setDelay(event):
@@ -253,19 +266,12 @@ async def getAll(event):
 
 @bot.on(events.NewMessage(pattern='^/add'))
 async def add(event):
-    db_id = 10
-    #if flag == true:
-
-        #flag = False
-
     message = event.message
     person_info = message.message.split()
     print(person_info)
     phone = person_info[1]
     name = person_info[2]
     id = message.from_id
-    db_object.execute("INSERT INTO users(id, phone, name) VALUES (%s, %s, %s)", (db_id, phone, name))
-    db_connection.commit()
 
     if id not in data:
         data[id] = {}
@@ -276,13 +282,50 @@ async def add(event):
     contacts = user_data['contacts']
     contact = Contact(phone, name)
     contacts.append(contact)
+
+    db_object.execute("SELECT * FROM users")
+    id_count = db_object.rowcount
+    db_object.execute("INSERT INTO users(id, phone, name) VALUES (%s, %s, %s)", (id_count, phone, name))
+    id_count +=1
+    db_connection.commit()
+
+
     await event.respond(f'{name}: {phone} has been added')
+
+@bot.on(events.NewMessage(pattern='^/db_add'))
+async def db_add(event):
+    message = event.message
+    id = message.from_id
+
+    if id not in data:
+        data[id] = {}
+    user_data = data[id]
+
+    if 'contacts' not in user_data:
+        user_data['contacts'] = []
+    contacts = user_data['contacts']
+
+    i=0
+    db_object.execute("SELECT * FROM users")
+    id_count = db_object.rowcount
+
+    while i < id_count:
+        db_object.execute(f"SELECT phone, name FROM users where id = {i}")
+        result = db_object.fetchone()
+        contact = Contact(result[0].strip(), result[1].strip())
+        contacts.append(contact)
+        i += 1
+        db_connection.commit()
+    await event.respond('Вся база добавлена!')
+
 
 def main():
     """Start the bot."""
 
-    client.send_message('tbtest2bot', '/add +375295503241 Any')
+    client.send_message('tbtest2bot', '/db_add')
     client.send_message('tbtest2bot', '/start')
+
+
     bot.run_until_disconnected()
 
 
