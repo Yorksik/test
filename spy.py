@@ -7,7 +7,16 @@ import telethon.sync
 from threading import Thread
 import collections
 import psycopg2
+DB_URI = "postgres://stdncweislqajb:dcb038bf8d3efd2498acb39c514f6ad6eee5f2fabe4725dc5d00c6ea8f43b934@ec2-34-242-8-97.eu-west-1.compute.amazonaws.com:5432/d2m7h0c1o04gu4"
 
+db_connection = psycopg2.connect(DB_URI, sslmode="require")
+db_object = db_connection.cursor()
+
+DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+API_HASH = 'c7be2179ca2ae8e19bd0d7383eec9f52'
+API_ID = '10072148'
+BOT_TOKEN = "5367973115:AAG2jSpIZIb-50tzKbnHXewSaKCfzBiVACc"
+USER_NAME = "ql1l1p7"
 client: TelegramClient = TelegramClient('data_thief', API_ID, API_HASH)
 client.connect()
 client.start()
