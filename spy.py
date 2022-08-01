@@ -110,9 +110,8 @@ async def stop(event):
 async def clearData(event):
     data.clear()
     await event.respond('Data has been cleared')
-
-
-         @bot.on(events.NewMessage(pattern='^/start$'))
+         
+@bot.on(events.NewMessage(pattern='^/start$'))
 async def start(event):
     message = event.message
     id = message.from_id
