@@ -8,19 +8,7 @@ from threading import Thread
 import collections
 import psycopg2
 
-DB_URI = "postgres://stdncweislqajb:dcb038bf8d3efd2498acb39c514f6ad6eee5f2fabe4725dc5d00c6ea8f43b934@ec2-34-242-8-97.eu-west-1.compute.amazonaws.com:5432/d2m7h0c1o04gu4"
-
-db_connection = psycopg2.connect(DB_URI, sslmode="require")
-db_object = db_connection.cursor()
-
-DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
-API_HASH = 'c7be2179ca2ae8e19bd0d7383eec9f52'
-API_ID = '10072148'
-BOT_TOKEN = "5367973115:AAG2jSpIZIb-50tzKbnHXewSaKCfzBiVACc"
-USER_NAME = "ql1l1p7"
-
 client: TelegramClient = TelegramClient('data_thief', API_ID, API_HASH)
-
 client.connect()
 client.start()
 
@@ -91,7 +79,7 @@ async def log(event):
     """Send a message when the command /start is issued."""
     message = event.message
     #id = message.from_id
-    str = f'{datetime.now().strftime(DATETIME_FORMAT)}: [{1}]: {message.message}'
+    str = f'{datetime.now().strftime(DATETIME_FORMAT)}: [{id}]: {message.message}'
     printToFile(str)
     #await bot.send_message(entity=entity,message=str)
     #await event.respond('cleared')
@@ -103,7 +91,7 @@ async def stop(event):
     id = message.from_id
     if id not in data:
         data[id] = {}
-    user_data = data[1]
+    user_data = data[id]
     user_data['is_running'] = False
     await event.respond('Monitoring has been stopped')
 
@@ -111,13 +99,13 @@ async def stop(event):
 async def clearData(event):
     data.clear()
     await event.respond('Data has been cleared')
-         
+
 @bot.on(events.NewMessage(pattern='^/start$'))
 async def start(event):
     message = event.message
     id = message.from_id
     if id not in data:
-       data[1] = {}
+       data[id] = {}
     user_data = data[id]
     if('is_running' in user_data and user_data['is_running']):
         await event.respond('Spy is already started')
@@ -131,7 +119,7 @@ async def start(event):
     if(len(contacts) < 1):
         await event.respond('No contacts added')
         return
-    await event.respond('Monitoring has been started')
+    await event.respond('__  Monitoring has been started __', parse_mode="Markdown")
 
     counter = 0
     user_data['is_running'] = True
@@ -140,7 +128,7 @@ async def start(event):
         user_data = data[id]
         if(not user_data['is_running'] or len(contacts) < 1):
             break;
-        print(f'running {1}: {counter}')
+        print(f'running {id}: {counter}')
         counter+=1
         for contact in contacts:
             print(contact)
@@ -149,31 +137,32 @@ async def start(event):
                 if contact.online != False:
                     contact.online = False
                     if contact.first_online != None:
-                        await event.respond(f'{(utc2localtime(account.status.was_online).strftime(DATETIME_FORMAT))}: {contact.name} went offline. ({(account.status.was_online.replace(tzinfo=None)-contact.first_online)})')
+                        await event.respond(f'{(utc2localtime(account.status.was_online).strftime(DATETIME_FORMAT))}: __{contact.name}__ went offline. **({str(account.status.was_online.replace(tzinfo=None)+timedelta(minutes=180)-contact.first_online).split(".")[0]})**', parse_mode="Markdown")
                     if contact.first_online == None:
-                        await event.respond(f'{utc2localtime(account.status.was_online).strftime(DATETIME_FORMAT)}: {contact.name} went offline.')
+                        await event.respond(f'{utc2localtime(account.status.was_online).strftime(DATETIME_FORMAT)}: __{contact.name}__ went offline.', parse_mode="Markdown")
                 elif contact.last_offline != account.status.was_online:
                     if contact.last_offline is not None:
-                        await event.respond(f'{utc2localtime(account.status.was_online).strftime(DATETIME_FORMAT)}: {contact.name} went offline after being online for short time.')
+                        await event.respond(f'{utc2localtime(account.status.was_online).strftime(DATETIME_FORMAT)}: __{contact.name}__ went offline after being online for short time.', parse_mode="Markdown")
                     else:
-                        await event.respond(f'{utc2localtime(account.status.was_online).strftime(DATETIME_FORMAT)}: {contact.name} went offline.')
+                        await event.respond(f'{utc2localtime(account.status.was_online).strftime(DATETIME_FORMAT)}: __{contact.name}__ went offline.', parse_mode="Markdown")
                 contact.last_offline = account.status.was_online
             elif isinstance(account.status, UserStatusOnline):
                 if contact.online != True:
                     contact.first_online = datetime.now()
                 if contact.online != True:
                     contact.online = True
-                    await event.respond(f'{(datetime.now()+timedelta(minutes=180)).strftime(DATETIME_FORMAT)}: {contact.name} went online.')
+                    await event.respond(f'{(datetime.now()+timedelta(minutes=180)).strftime(DATETIME_FORMAT)}: __{contact.name}__ went online.', parse_mode="Markdown")
             else:
                 if contact.online != False:
                     contact.online = False
-                    await event.respond(f'{(datetime.now()+timedelta(minutes=180)).strftime(DATETIME_FORMAT)}: {contact.name} went offline.')
+                    await event.respond(f'{(datetime.now()+timedelta(minutes=180)).strftime(DATETIME_FORMAT)}: __{contact.name}__ went offline.', parse_mode="Markdown")
                 contact.last_offline = None
         delay = 5
         if('delay' in user_data):
             delay = user_data['delay']
         sleep(delay)
     await event.respond(f'Spy gonna zzzzzz...')
+
 @bot.on(events.NewMessage(pattern='^/remove'))
 async def remove(event):
     message = event.message
@@ -215,7 +204,7 @@ async def setDelay(event):
     id = message.from_id
     if id not in data:
         data[id] = {}
-    user_data = data[1]
+    user_data = data[id]
 
     print(index)
     if(index >= 0):
@@ -314,6 +303,7 @@ async def db_add(event):
         i += 1
         db_connection.commit()
     await event.respond('Вся база добавлена!')
+
 
 def main():
     """Start the bot."""
