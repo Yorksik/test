@@ -146,7 +146,7 @@ async def start(event):
                 if contact.online != False:
                     contact.online = False
                     if contact.first_online != None:
-                        await event.respond(f'{(utc2localtime(account.status.was_online).strftime(DATETIME_FORMAT))}: __{contact.name}__ went offline. **({str(account.status.was_online.replace(tzinfo=None)+timedelta(minutes=180)-contact.first_online).split(".")[0]})**', parse_mode="Markdown")
+                        await event.respond(f'{(utc2localtime(account.status.was_online).strftime(DATETIME_FORMAT))}: __{contact.name}__ went offline. **({str(account.status.was_online.replace(tzinfo=None)-contact.first_online).split(".")[0]})**', parse_mode="Markdown")
                     if contact.first_online == None:
                         await event.respond(f'{utc2localtime(account.status.was_online).strftime(DATETIME_FORMAT)}: __{contact.name}__ went offline.', parse_mode="Markdown")
                 elif contact.last_offline != account.status.was_online:
