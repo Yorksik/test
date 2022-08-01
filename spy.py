@@ -8,19 +8,18 @@ from threading import Thread
 import collections
 import psycopg2
 
-DB_URI = "postgres://stdncweislqajb:dcb038bf8d3efd2498acb39c514f6ad6eee5f2fabe4725dc5d00c6ea8f43b934@ec2-34-242-8-97.eu-west-1.compute.amazonaws.com:5432/d2m7h0c1o04gu4"
+DB_URI = "postgres://ljxoypqypwhwxz:cd56387529a6f5d551cec09f88c8800222b1da4a15fcd8ad66c6b2e9796b33c1@ec2-176-34-215-248.eu-west-1.compute.amazonaws.com:5432/d9809s2qrt5dtv"
 
 db_connection = psycopg2.connect(DB_URI, sslmode="require")
 db_object = db_connection.cursor()
-
 DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
-API_HASH = 'c7be2179ca2ae8e19bd0d7383eec9f52'
-API_ID = '10072148'
-BOT_TOKEN = "5367973115:AAG2jSpIZIb-50tzKbnHXewSaKCfzBiVACc"
-USER_NAME = "ql1l1p7"
+DATETIME_FORMAT2 = '%H:%M:%S'
+API_HASH = '8fa9b3db12a399691611b57c62312095'
+API_ID = '12986980'
+BOT_TOKEN = "5041144199:AAESF8m4ca15Op0U4HTsfHqQWiAPiICTd8Y"
+USER_NAME = "gotat0"
 
 client: TelegramClient = TelegramClient('data_thief', API_ID, API_HASH)
-
 client.connect()
 client.start()
 
@@ -50,6 +49,7 @@ print('running')
 class Contact:
     online = None
     last_offline = None
+    first_online = None
     id = ''
     name = ''
 
@@ -147,7 +147,10 @@ async def start(event):
             if isinstance(account.status, UserStatusOffline):
                 if contact.online != False:
                     contact.online = False
-                    await event.respond(f'{utc2localtime(account.status.was_online).strftime(DATETIME_FORMAT)}: {contact.name} went offline.')
+                    if contact.first_online != None:
+                        await event.respond(f'{(utc2localtime(account.status.was_online).strftime(DATETIME_FORMAT))}: {contact.name} went offline. ({(account.status.was_online.replace(tzinfo=None)+timedelta(minutes=180)-contact.first_online)})')
+                    if contact.first_online == None:
+                        await event.respond(f'{utc2localtime(account.status.was_online).strftime(DATETIME_FORMAT)}: {contact.name} went offline.')
                 elif contact.last_offline != account.status.was_online:
                     if contact.last_offline is not None:
                         await event.respond(f'{utc2localtime(account.status.was_online).strftime(DATETIME_FORMAT)}: {contact.name} went offline after being online for short time.')
@@ -155,6 +158,8 @@ async def start(event):
                         await event.respond(f'{utc2localtime(account.status.was_online).strftime(DATETIME_FORMAT)}: {contact.name} went offline.')
                 contact.last_offline = account.status.was_online
             elif isinstance(account.status, UserStatusOnline):
+                if contact.online != True:
+                    contact.first_online = datetime.now()
                 if contact.online != True:
                     contact.online = True
                     await event.respond(f'{(datetime.now()+timedelta(minutes=180)).strftime(DATETIME_FORMAT)}: {contact.name} went online.')
@@ -312,15 +317,11 @@ async def db_add(event):
 
 def main():
     """Start the bot."""
-
-    client.send_message('tbtest2bot', '/db_add')
-    client.send_message('tbtest2bot', '/start')
-
-
+    client.send_message('tbOnlinerBot', '/db_add')
+    client.send_message('tbOnlinerBot', '/start')
     bot.run_until_disconnected()
 
 def utc2localtime(utc):
-
     pivot = mktime(utc.timetuple())
     offset = datetime.fromtimestamp(pivot) - datetime.utcfromtimestamp(pivot)
     a = timedelta(minutes=180)
@@ -334,3 +335,4 @@ def printToFile(str):
 
 if __name__ == '__main__':
     main()
+
