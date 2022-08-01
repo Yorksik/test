@@ -50,6 +50,7 @@ print('running')
 class Contact:
     online = None
     last_offline = None
+    first_online = None
     id = ''
     name = ''
 
@@ -148,7 +149,7 @@ async def start(event):
                 if contact.online != False:
                     contact.online = False
                     if contact.first_online != None:
-                        await event.respond(f'{(utc2localtime(account.status.was_online).strftime(DATETIME_FORMAT))}: {contact.name} went offline. ({(account.status.was_online.replace(tzinfo=None)+timedelta(minutes=180)-contact.first_online)})')
+                        await event.respond(f'{(utc2localtime(account.status.was_online).strftime(DATETIME_FORMAT))}: {contact.name} went offline. ({(account.status.was_online.replace(tzinfo=None)-contact.first_online)})')
                     if contact.first_online == None:
                         await event.respond(f'{utc2localtime(account.status.was_online).strftime(DATETIME_FORMAT)}: {contact.name} went offline.')
                 elif contact.last_offline != account.status.was_online:
