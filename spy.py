@@ -146,12 +146,18 @@ async def start(event):
                 if contact.online != False:
                     contact.online = False
                     if contact.first_online != None:
-                        await event.respond(f'{(utc2localtime(account.status.was_online).strftime(DATETIME_FORMAT))}: __{contact.name}__ went offline. **({str(account.status.was_online.replace(tzinfo=None)-contact.first_online).split(".")[0]})**', parse_mode="Markdown")
+                        contact.onlineCount = contact.onlineCount + 1
+                        contact.totalOnlineTime = contact.totalOnlineTime + (account.status.was_online.replace(tzinfo=None) - contact.first_online).seconds
+                        await event.respond(f'{(utc2localtime(account.status.was_online).strftime(DATETIME_FORMAT))}: __{contact.name}__ went offline. **({str(account.status.was_online.replace(tzinfo=None)-contact.first_online).split(".")[0]})**'
+                                            f' ({contact.onlineCount} онлайнов, {datetime.fromtimestamp(contact.totalOnlineTime).strftime(DATETIME_FORMAT2)})', parse_mode="Markdown")
                     if contact.first_online == None:
                         await event.respond(f'{utc2localtime(account.status.was_online).strftime(DATETIME_FORMAT)}: __{contact.name}__ went offline.', parse_mode="Markdown")
                 elif contact.last_offline != account.status.was_online:
                     if contact.last_offline is not None:
-                        await event.respond(f'{utc2localtime(account.status.was_online).strftime(DATETIME_FORMAT)}: __{contact.name}__ went offline after being online for short time.', parse_mode="Markdown")
+                        contact.onlineCount =contact.onlineCount + 1
+                        
+                        await event.respond(f'{utc2localtime(account.status.was_online).strftime(DATETIME_FORMAT)}: __{contact.name}__ went offline after being online for short time.'
+                                            f' ({contact.onlineCount} онлайнов, {datetime.fromtimestamp(contact.totalOnlineTime).strftime(DATETIME_FORMAT2)})', parse_mode="Markdown")
                     else:
                         await event.respond(f'{utc2localtime(account.status.was_online).strftime(DATETIME_FORMAT)}: __{contact.name}__ went offline.', parse_mode="Markdown")
                 contact.last_offline = account.status.was_online
