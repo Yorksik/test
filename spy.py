@@ -48,6 +48,8 @@ class Contact:
     online = None
     last_offline = None
     first_online = None
+    onlineCount = 0
+    totalOnlineTime = 0
     id = ''
     name = ''
 
