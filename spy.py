@@ -13,6 +13,7 @@ db_connection = psycopg2.connect(DB_URI, sslmode="require")
 db_object = db_connection.cursor()
 
 DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+DATETIME_FORMAT2 = '%H:%M:%S'
 API_HASH = 'c7be2179ca2ae8e19bd0d7383eec9f52'
 API_ID = '10072148'
 BOT_TOKEN = "5367973115:AAG2jSpIZIb-50tzKbnHXewSaKCfzBiVACc"
