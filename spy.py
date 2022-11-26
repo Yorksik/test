@@ -7,7 +7,7 @@ import telethon.sync
 from threading import Thread
 import collections
 import psycopg2
-DB_URI = "postgres://stdncweislqajb:dcb038bf8d3efd2498acb39c514f6ad6eee5f2fabe4725dc5d00c6ea8f43b934@ec2-34-242-8-97.eu-west-1.compute.amazonaws.com:5432/d2m7h0c1o04gu4"
+DB_URI = "psql "host=mypsql.postgres.database.azure.com port=5432 dbname=tbOnlineAll user=mypsql password=1234567890Aa sslmode=require""
 
 db_connection = psycopg2.connect(DB_URI, sslmode="require")
 db_object = db_connection.cursor()
