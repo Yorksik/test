@@ -7,9 +7,16 @@ import telethon.sync
 from threading import Thread
 import collections
 import psycopg2
-DB_URI = "psql "host=mypsql.postgres.database.azure.com port=5432 dbname=tbOnlineAll user=mypsql password=1234567890Aa sslmode=require""
 
-db_connection = psycopg2.connect(DB_URI, sslmode="require")
+host = "mypsql.postgres.database.azure.com"
+dbname = "tbOnlineAll"
+user = "mypsql"
+password = "1234567890Aa"
+sslmode = "require"
+
+conn_string = "host={0} user={1} dbname={2} password={3} sslmode={4}".format(host, user, dbname, password, sslmode)
+
+db_connection = psycopg2.connect(conn_string)
 db_object = db_connection.cursor()
 
 DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
