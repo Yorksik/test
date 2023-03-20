@@ -156,6 +156,7 @@ async def start(event):
         for contact in contacts:
             print(contact)
             account = await client.get_entity(contact.id)
+            print (datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
             if isinstance(account.status, UserStatusOffline):
                 if contact.online != False:
                     contact.online = False
